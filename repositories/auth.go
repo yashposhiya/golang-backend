@@ -1,0 +1,24 @@
+package repositories
+
+import (
+	"GoLang/config"
+	"GoLang/models"
+)
+
+
+
+func InsertUser(user *models.User)(*models.User,error){
+	if err:= config.DB.Create(user).Error; err != nil{
+		return nil,err
+	}
+
+	return user,nil
+}
+
+func GetUserByUsername(name string)(*models.User,error){
+	var user models.User
+	if err := config.DB.Where("name = ?",name).First(&user).Error; err != nil{
+		return nil,err
+	}
+	return &user,nil
+}
