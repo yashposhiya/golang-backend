@@ -21,8 +21,8 @@ func main() {
 	r := gin.Default()
 
 	// Auth
-	r.POST("/user/register", handlers.RegisterUser)
-	r.POST("/user/login", handlers.LoginUser)
+	r.POST("/users/register", handlers.RegisterUser)
+	r.POST("/users/login", handlers.LoginUser)
 
 	r.Use(middlewares.AuthMiddleware())
 	// Products
@@ -34,5 +34,5 @@ func main() {
 	r.PATCH("/products/:id", handlers.ProductUpdatePartial)
 	fmt.Println("Routes inserted")
 
-	r.Run(":"+config.AppConfig.Port)
+	r.Run(":" + config.AppConfig.Port)
 }

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"GoLang/dto"
 	"GoLang/models"
 	"GoLang/services"
 	"GoLang/utils"
@@ -10,41 +11,60 @@ import (
 )
 
 func RegisterUser(ctx *gin.Context) {
-	var user models.User
-	if err := ctx.BindJSON(&user); err != nil {
+	var req dto.UserRegisterRequest
+	if err := ctx.BindJSON(&req); err != nil {
 		fmt.Println(err)
 		utils.Error(ctx, 400, "invalid data")
 		return
 	}
-	newUser, err := services.RegisterUser(&user)
+
+	//Mapping Req DTO -> Model
+	user := models.User{
+		Username: req.Username,
+		Password: req.Password,
+	}
+	newUser, err := services.RegisterUser(user)
 	if err != nil {
 		utils.Error(ctx, 500, err.Error())
 		return
 	}
-	utils.Success(ctx, 200, newUser)
+
+	//Mapping Model -> Response DTO
+	resp := dto.UserResponse{
+		Id:       newUser.Id,
+		Username: newUser.Username,
+	}
+	utils.Success(ctx, 200, resp)
 }
 
 func LoginUser(ctx *gin.Context) {
-	var user models.UserLogin
-	if err := ctx.BindJSON(&user); err != nil {
+	var req dto.UserLoginRequest
+	if err := ctx.BindJSON(&req); err != nil {
 		utils.Error(ctx, 400, "invalid data")
 		return
 	}
-	newUser, err := services.LoginUser(&user)
+	//Mapping Req DTO -> Model
+	user := models.User{
+		Username: req.Username,
+		Password: req.Password,
+	}
+	newUser, err := services.LoginUser(user)
 	if err != nil {
 		utils.Error(ctx, 404, err.Error())
 		return
 	}
-	token, err := utils.GenerateToken(user.Name)
+	token, err := utils.GenerateToken(user.Username)
 	if err != nil {
 		utils.Error(ctx, 500, "Internal server error")
 		fmt.Println("JWT Token Generation Error:", err)
 		return
 	}
-	resp := models.UserLoginResponse{
-		Id:    newUser.Id,
-		Name:  newUser.Name,
-		Token: token,
+
+	// Mapping Model -> Resp DTO With Token
+	resp := dto.UserResponse{
+		Id:       newUser.Id,
+		Username: newUser.Username,
+		Token:    token,
 	}
 	utils.Success(ctx, 200, resp)
 }

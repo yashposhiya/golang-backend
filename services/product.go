@@ -9,12 +9,12 @@ import (
 var database []models.Product
 var nextId = 1
 
-func CreateProduct(product models.Product) (models.Product, error) {
-	newProduct, err := repositories.CreateProduct(product)
+func CreateProduct(req models.Product) (models.Product, error) {
+	newProduct, err := repositories.CreateProduct(req)
 	if err != nil {
 		return models.Product{}, fmt.Errorf("failed to create product")
 	}
-	return newProduct, nil
+	return newProduct,nil
 }
 
 func GetProduct(id uint) (models.Product, error) {
@@ -45,6 +45,6 @@ func UpdateProductFull(id uint, product models.Product) (models.Product, error) 
 	return repositories.UpdateProductFull(id, product)
 }
 
-func ProductUpdatePartial(id uint, product models.ProductUpdatePartial) (models.Product, error) {
+func ProductUpdatePartial(id uint, product map[string]any) (models.Product, error) {
 	return repositories.UpdateProductPartial(id, product)
 }

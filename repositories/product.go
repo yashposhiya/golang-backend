@@ -38,19 +38,10 @@ func UpdateProductFull(id uint, product models.Product) (models.Product, error) 
 	return product, nil
 }
 
-func UpdateProductPartial(id uint, product models.ProductUpdatePartial) (models.Product, error) {
-	p := make(map[string]any)
-
-	if product.Name != nil {
-		p["name"] = product.Name
-	}
-	if product.Price != nil {
-		p["price"] = product.Price
-	}
-
+func UpdateProductPartial(id uint, product map[string]any) (models.Product, error) {
 	var newProduct models.Product
 
-	res := config.DB.Model(&newProduct).Clauses(clause.Returning{}).Where("id = ?", id).Updates(p)
+	res := config.DB.Model(&newProduct).Clauses(clause.Returning{}).Where("id = ?", id).Updates(product)
 
 	if res.Error != nil {
 		return models.Product{}, fmt.Errorf("Internal server error")

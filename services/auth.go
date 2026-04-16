@@ -6,22 +6,21 @@ import (
 	"fmt"
 )
 
-func RegisterUser(user *models.User) (*models.User, error) {
+func RegisterUser(user models.User) (models.User, error) {
 	newUser, err := repositories.InsertUser(user)
 	if err != nil {
-		return nil, fmt.Errorf("registration failed")
+		return models.User{}, fmt.Errorf("registration failed")
 	}
 	return newUser, nil
 }
 
-func LoginUser(user *models.UserLogin) (*models.User,error) {
-	newUser,err := repositories.GetUserByUsername(user.Name)
-	if err != nil{
-		return nil, fmt.Errorf("User not found")
+func LoginUser(user models.User) (models.User, error) {
+	newUser, err := repositories.GetUserByUsername(user.Username)
+	if err != nil {
+		return models.User{}, fmt.Errorf("User not found")
 	}
-	if newUser.Password == user.Password{
-		return newUser,nil
+	if newUser.Password == user.Password {
+		return newUser, nil
 	}
-	return nil,fmt.Errorf("wrong credentials")
+	return models.User{}, fmt.Errorf("wrong credentials")
 }
-
