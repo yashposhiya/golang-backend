@@ -6,35 +6,34 @@ import (
 	"GoLang/models"
 	"GoLang/services"
 	"GoLang/utils"
-	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
 func InsertProduct(ctx *gin.Context) {
-	fmt.Println("Inside InsertProduct()")
 	var req dto.CreateProductRequest
 
 	if err := ctx.BindJSON(&req); err != nil {
-		utils.Error(ctx, 400, err.Error())
+		utils.HandleError(ctx, utils.InvalidJSON())
 		return
 	}
 
 	//Mapping Req DTO -> Model
 	product := models.Product{
-		Name: req.Name,
+		Name:  req.Name,
 		Price: req.Price,
 	}
 
 	newProduct, err := services.CreateProduct(product)
 	if err != nil {
-		utils.Error(ctx, 500, err.Error())
+		utils.HandleError(ctx, err)
 		return
 	}
 
 	//Mapping Model -> Resp DTO
 	resp := dto.ProductResponse{
-		Id: newProduct.Id,
-		Name: newProduct.Name,
+		Id:    newProduct.Id,
+		Name:  newProduct.Name,
 		Price: newProduct.Price,
 	}
 
@@ -43,21 +42,22 @@ func InsertProduct(ctx *gin.Context) {
 
 func GetProduct(ctx *gin.Context) {
 	idStr := ctx.Param("id")
-	id,err := helpers.StringToUint(idStr)
-	if err != nil{
-		utils.Error(ctx,401,"Invalid Id")
+	id, err := helpers.StringToUint(idStr)
+	if err != nil {
+		utils.HandleError(ctx, utils.InvalidID())
+		return
 	}
 
 	product, err := services.GetProduct(id)
 	if err != nil {
-		utils.Error(ctx, 404, err.Error())
+		utils.HandleError(ctx, err)
 		return
 	}
 
 	//Mapping Model -> Resp DTO
 	resp := dto.ProductResponse{
-		Id: product.Id,
-		Name: product.Name,
+		Id:    product.Id,
+		Name:  product.Name,
 		Price: product.Price,
 	}
 	utils.Success(ctx, 200, resp)
@@ -65,14 +65,14 @@ func GetProduct(ctx *gin.Context) {
 
 func DeleteProduct(ctx *gin.Context) {
 	idStr := ctx.Param("id")
-	id,err := helpers.StringToUint(idStr)
-	if err != nil{
-		utils.Error(ctx,401,"Invalid Id")
+	id, err := helpers.StringToUint(idStr)
+	if err != nil {
+		utils.HandleError(ctx, utils.InvalidID())
 		return
 	}
 	err = services.DeleteProduct(id)
 	if err != nil {
-		utils.Error(ctx, 404, err.Error())
+		utils.HandleError(ctx, err)
 		return
 	}
 	ctx.JSON(204, gin.H{
@@ -85,13 +85,13 @@ func DeleteProduct(ctx *gin.Context) {
 func GetAllProducts(ctx *gin.Context) {
 	data, err := services.GetAllProducts()
 	if err != nil {
-		utils.Error(ctx, 404, err.Error())
+		utils.HandleError(ctx, err)
 	}
-	products := make([]dto.ProductResponse,0,len(data))
-	for _,p := range data{
+	products := make([]dto.ProductResponse, 0, len(data))
+	for _, p := range data {
 		resp := dto.ProductResponse{
-			Id: p.Id,
-			Name: p.Name,
+			Id:    p.Id,
+			Name:  p.Name,
 			Price: p.Price,
 		}
 		products = append(products, resp)
@@ -102,32 +102,32 @@ func GetAllProducts(ctx *gin.Context) {
 func UpdateProductPut(ctx *gin.Context) {
 	var req dto.UpdateProductRequest
 	idStr := ctx.Param("id")
-	id,err := helpers.StringToUint(idStr)
-	if err != nil{
-		utils.Error(ctx,401,"Invalid Id")
+	id, err := helpers.StringToUint(idStr)
+	if err != nil {
+		utils.HandleError(ctx, utils.InvalidID())
 		return
 	}
 
 	if err = ctx.BindJSON(&req); err != nil {
-		ctx.JSON(400, gin.H{"error": "Invalud json"})
+		utils.HandleError(ctx, utils.InvalidJSON())
 		return
 	}
 
 	//Mapping Req DTO -> Model
 	product := models.Product{
-		Name: req.Name,
+		Name:  req.Name,
 		Price: req.Price,
 	}
 	newProduct, err := services.UpdateProductFull(id, product)
 	if err != nil {
-		utils.Error(ctx, 404, err.Error())
+		utils.HandleError(ctx, err)
 		return
 	}
 
 	//Mapping Model -> Resp DTO
 	resp := dto.ProductResponse{
-		Id: newProduct.Id,
-		Name: newProduct.Name,
+		Id:    newProduct.Id,
+		Name:  newProduct.Name,
 		Price: newProduct.Price,
 	}
 	utils.Success(ctx, 200, resp)
@@ -137,33 +137,33 @@ func ProductUpdatePartial(ctx *gin.Context) {
 	var req dto.PatchUpdateProductRequest
 	idStr := ctx.Param("id")
 	id, err := helpers.StringToUint(idStr)
-	if err != nil{
-		utils.Error(ctx,401,"Invalid Id")
+	if err != nil {
+		utils.HandleError(ctx, utils.InvalidID())
 		return
 	}
 	if err := ctx.BindJSON(&req); err != nil {
-		ctx.JSON(400, "Invalid json")
+		utils.HandleError(ctx, utils.InvalidJSON())
 		return
 	}
 
 	// Mapping Req DTO -> Map For Partial Updation
 	product := make(map[string]any)
-	if req.Name != nil{
+	if req.Name != nil {
 		product["name"] = req.Name
 	}
-	if req.Price != nil{
+	if req.Price != nil {
 		product["price"] = req.Price
 	}
 	newProduct, err := services.ProductUpdatePartial(id, product)
 	if err != nil {
-		utils.Error(ctx, 404, err.Error())
+		utils.HandleError(ctx, err)
 		return
 	}
 
 	// Mapping Model -> Resp DTO
 	resp := dto.ProductResponse{
-		Id: newProduct.Id,
-		Name: newProduct.Name,
+		Id:    newProduct.Id,
+		Name:  newProduct.Name,
 		Price: newProduct.Price,
 	}
 	utils.Success(ctx, 200, resp)

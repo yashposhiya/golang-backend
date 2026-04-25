@@ -18,6 +18,8 @@ func main() {
 
 	config.DB.AutoMigrate(&models.Product{}, &models.User{})
 
+	config.InitRedis()
+
 	r := gin.Default()
 
 	// Auth
@@ -25,6 +27,9 @@ func main() {
 	r.POST("/users/login", handlers.LoginUser)
 
 	r.Use(middlewares.AuthMiddleware())
+	//Auth - Logout
+	r.POST("/users/logout", handlers.LogoutUser)
+
 	// Products
 	r.GET("/products/:id", handlers.GetProduct)
 	r.POST("/products/", handlers.InsertProduct)

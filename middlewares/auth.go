@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"GoLang/repositories"
 	"GoLang/utils"
 	"strings"
 
@@ -38,12 +39,42 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		claims := token.Claims.(jwt.MapClaims)
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			utils.Error(ctx, 401, "Invalid token claims")
+			ctx.Abort()
+			return
+		}
+
+		jtiRaw, exists := claims["jti"]
+		if !exists || jtiRaw == nil {
+			utils.Error(ctx, 401, "Missing jti")
+			ctx.Abort()
+			return
+		}
+
+		jti, ok := jtiRaw.(string)
+		if !ok {
+			utils.Error(ctx, 401, "Invalid jti format")
+			ctx.Abort()
+			return
+		}
+
+		// claims := token.Claims.(jwt.MapClaims)
+
+		// jti := claims["jti"].(string)
+		err = repositories.CheckBlacklistToken(jti)
+		if err != nil {
+			utils.HandleError(ctx, err)
+			ctx.Abort()
+			return
+		}
 
 		username := claims["username"].(string)
 
 		//store in context for future reference or use
-		ctx.Set("username",username)
+		ctx.Set("username", username)
+		ctx.Set("jti", jti)
 
 		ctx.Next()
 	}

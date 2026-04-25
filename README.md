@@ -2,16 +2,20 @@
 
 - RESTful APIs using Gin
 - PostgreSQL with GORM
+- Password Hashing With bcrypt `Update`
 - JWT Authentication & Middleware
+- JWT token blacklisting upon logout system `Update`
 - Environment-based configuration (.env)
 - Clean architecture (handlers, services, repository)
 - Separation of DTOs to make it future proof for scaling and easy to read `Update`
+- Centralized error handling `Update`
+
 
 ## ⚙️ In Progress
 
-- Password Hashing
-- Centralized error handling
 - Request validation
+- Rate Limitting
+- Cache Implementation For Products
 
 
 ## 🛠 Tech Stack

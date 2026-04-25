@@ -3,7 +3,7 @@ package repositories
 import (
 	"GoLang/config"
 	"GoLang/models"
-	"fmt"
+	"GoLang/utils"
 
 	"gorm.io/gorm/clause"
 )
@@ -33,7 +33,10 @@ func UpdateProductFull(id uint, product models.Product) (models.Product, error) 
 	product.Id = id
 	result := config.DB.Model(&models.Product{}).Where("id = ?", id).Updates(&product)
 	if result.RowsAffected == 0 {
-		return models.Product{}, fmt.Errorf("product not found")
+		return models.Product{}, &utils.AppError{
+			StatusCode: 404,
+			Message:    "Product Not Found",
+		}
 	}
 	return product, nil
 }
@@ -44,10 +47,16 @@ func UpdateProductPartial(id uint, product map[string]any) (models.Product, erro
 	res := config.DB.Model(&newProduct).Clauses(clause.Returning{}).Where("id = ?", id).Updates(product)
 
 	if res.Error != nil {
-		return models.Product{}, fmt.Errorf("Internal server error")
+		return models.Product{}, &utils.AppError{
+			StatusCode: 500,
+			Message:    "Internal Server Error",
+		}
 	}
 	if res.RowsAffected == 0 {
-		return models.Product{}, fmt.Errorf("product not found")
+		return models.Product{}, &utils.AppError{
+			StatusCode: 404,
+			Message:    "Product Not Found",
+		}
 	}
 	return newProduct, nil
 }

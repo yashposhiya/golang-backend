@@ -3,6 +3,7 @@ package handlers
 import (
 	"GoLang/dto"
 	"GoLang/models"
+	"GoLang/repositories"
 	"GoLang/services"
 	"GoLang/utils"
 	"fmt"
@@ -67,4 +68,26 @@ func LoginUser(ctx *gin.Context) {
 		Token:    token,
 	}
 	utils.Success(ctx, 200, resp)
+}
+
+func LogoutUser(ctx *gin.Context) {
+	val, exists := ctx.Get("jti")
+	if !exists {
+		ctx.JSON(401, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	jti, ok := val.(string)
+	if !ok {
+		ctx.JSON(401, gin.H{"error": "invalid token data"})
+		return
+	}
+	if err := repositories.BlackListToken(jti); err != nil {
+		utils.HandleError(ctx, err)
+		return
+	}
+	ctx.JSON(200, gin.H{
+		"message": "Logout Success",
+	})
+
 }

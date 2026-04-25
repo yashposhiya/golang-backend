@@ -3,24 +3,27 @@ package services
 import (
 	"GoLang/models"
 	"GoLang/repositories"
-	"fmt"
+	"GoLang/utils"
 )
-
-var database []models.Product
-var nextId = 1
 
 func CreateProduct(req models.Product) (models.Product, error) {
 	newProduct, err := repositories.CreateProduct(req)
 	if err != nil {
-		return models.Product{}, fmt.Errorf("failed to create product")
+		return models.Product{}, &utils.AppError{
+			StatusCode: 500,
+			Message:    "Failed To Create Product",
+		}
 	}
-	return newProduct,nil
+	return newProduct, nil
 }
 
 func GetProduct(id uint) (models.Product, error) {
 	newProduct, err := repositories.GetProduct(id)
 	if err != nil {
-		return models.Product{}, fmt.Errorf("product not found with id %d", id)
+		return models.Product{}, &utils.AppError{
+			StatusCode: 404,
+			Message:    "Product Not Found",
+		}
 	}
 	return newProduct, nil
 }
@@ -28,7 +31,10 @@ func GetProduct(id uint) (models.Product, error) {
 func DeleteProduct(id uint) error {
 	err := repositories.DeleteProduct(id)
 	if err != nil {
-		return fmt.Errorf("product not found")
+		return &utils.AppError{
+			StatusCode: 404,
+			Message:    "Product Not Found",
+		}
 	}
 	return nil
 }
@@ -36,7 +42,10 @@ func DeleteProduct(id uint) error {
 func GetAllProducts() ([]models.Product, error) {
 	products, err := repositories.GetAllProducts()
 	if err != nil {
-		return []models.Product{}, fmt.Errorf("no products found")
+		return []models.Product{}, &utils.AppError{
+			StatusCode: 404,
+			Message:    "No Products Found",
+		}
 	}
 	return products, nil
 }
