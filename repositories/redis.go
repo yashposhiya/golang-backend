@@ -42,3 +42,31 @@ func CheckBlacklistToken(jti string) error {
 	}
 	return nil
 }
+
+func AllowRequest(key string, limit int, window time.Duration) (bool,error){
+
+	count, err := config.RDB.Incr(ctx, key).Result()
+	if err != nil{
+		return false,&utils.AppError{
+			StatusCode: 500,
+			Message: "Internal Server Error",
+		}
+	}
+
+	if count == 1{
+		err := config.RDB.Expire(ctx, key, window).Err()
+		if err != nil{
+			return false, &utils.AppError{
+				StatusCode: 500,
+				Message: "Internal Server Error",
+			}
+		}
+	}
+	if count > int64(limit){
+		return false, &utils.AppError{
+			StatusCode: http.StatusTooManyRequests,
+			Message: "Too Many Request",
+		}
+	}
+	return true, nil
+}

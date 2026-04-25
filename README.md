@@ -9,14 +9,13 @@
 - Clean architecture (handlers, services, repository)
 - Separation of DTOs to make it future proof for scaling and easy to read `Update`
 - Centralized error handling `Update`
-
+- Rate Limiting with only 5 requests allowed per minute `Update`
 
 ## ⚙️ In Progress
 
 - Request validation
-- Rate Limitting
 - Cache Implementation For Products
-
+- Further Rate Limiting Configuration by Categorizing and Custom dividing
 
 ## 🛠 Tech Stack
 

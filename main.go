@@ -26,7 +26,7 @@ func main() {
 	r.POST("/users/register", handlers.RegisterUser)
 	r.POST("/users/login", handlers.LoginUser)
 
-	r.Use(middlewares.AuthMiddleware())
+	r.Use(middlewares.AuthMiddleware(), middlewares.RateLimiterMiddleware())
 	//Auth - Logout
 	r.POST("/users/logout", handlers.LogoutUser)
 
