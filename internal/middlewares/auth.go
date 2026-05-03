@@ -1,8 +1,9 @@
 package middlewares
 
 import (
-	"GoLang/repositories"
-	"GoLang/utils"
+	"GoLang/internal/repositories"
+	"GoLang/internal/utils"
+	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		authHeader := ctx.GetHeader("Authorization")
 
 		if authHeader == "" {
-			utils.Error(ctx, 401, "Missing token")
+			utils.HandleError(ctx, utils.InvalidJWT())
 			ctx.Abort()
 			return
 		}
@@ -22,7 +23,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		parts := strings.Split(authHeader, " ")
 
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			utils.Error(ctx, 401, "Invalid token format")
+			fmt.Println("Bearer")
+			utils.HandleError(ctx, utils.InvalidJWT())
 			ctx.Abort()
 			return
 		}
@@ -30,32 +32,39 @@ func AuthMiddleware() gin.HandlerFunc {
 		tokenString := parts[1]
 
 		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("Error")
+			}
 			return utils.Secret, nil
 		})
 
 		if err != nil || !token.Valid {
-			utils.Error(ctx, 401, "Invalid token")
+			fmt.Println("not valid or err", err)
+			utils.HandleError(ctx, utils.InvalidJWT())
 			ctx.Abort()
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			utils.Error(ctx, 401, "Invalid token claims")
+			fmt.Println("No claims")
+			utils.HandleError(ctx, utils.InvalidJWT())
 			ctx.Abort()
 			return
 		}
 
 		jtiRaw, exists := claims["jti"]
 		if !exists || jtiRaw == nil {
-			utils.Error(ctx, 401, "Missing jti")
+			fmt.Println("jti not there")
+			utils.HandleError(ctx, utils.InvalidJWT())
 			ctx.Abort()
 			return
 		}
 
 		jti, ok := jtiRaw.(string)
 		if !ok {
-			utils.Error(ctx, 401, "Invalid jti format")
+			fmt.Println("jti not in format")
+			utils.HandleError(ctx, utils.InvalidJWT())
 			ctx.Abort()
 			return
 		}
@@ -65,12 +74,25 @@ func AuthMiddleware() gin.HandlerFunc {
 		// jti := claims["jti"].(string)
 		err = repositories.CheckBlacklistToken(jti)
 		if err != nil {
-			utils.HandleError(ctx, err)
+			fmt.Println("not blacklist")
+			utils.HandleError(ctx, utils.InvalidJWT())
 			ctx.Abort()
 			return
 		}
 
-		username := claims["username"].(string)
+		usernameRaw, exists := claims["username"]
+		if !exists || usernameRaw == nil {
+			fmt.Println("no username")
+			utils.HandleError(ctx, utils.InvalidJWT())
+			ctx.Abort()
+			return
+		}
+
+		username, ok := usernameRaw.(string)
+		if !ok {
+			fmt.Println("username format not right")
+			utils.HandleError(ctx, utils.InvalidJWT())
+		}
 
 		//store in context for future reference or use
 		ctx.Set("username", username)

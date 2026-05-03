@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"GoLang/repositories"
-	"GoLang/utils"
+	"GoLang/internal/repositories"
+	"GoLang/internal/utils"
 	"fmt"
 	"time"
 

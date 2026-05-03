@@ -2,8 +2,8 @@ package repositories
 
 import (
 	"GoLang/config"
-	"GoLang/models"
-	"GoLang/utils"
+	"GoLang/internal/models"
+	"GoLang/internal/utils"
 
 	"gorm.io/gorm/clause"
 )
@@ -33,10 +33,7 @@ func UpdateProductFull(id uint, product models.Product) (models.Product, error) 
 	product.Id = id
 	result := config.DB.Model(&models.Product{}).Where("id = ?", id).Updates(&product)
 	if result.RowsAffected == 0 {
-		return models.Product{}, &utils.AppError{
-			StatusCode: 404,
-			Message:    "Product Not Found",
-		}
+		return models.Product{}, utils.ProductNotFound()
 	}
 	return product, nil
 }
@@ -47,16 +44,19 @@ func UpdateProductPartial(id uint, product map[string]any) (models.Product, erro
 	res := config.DB.Model(&newProduct).Clauses(clause.Returning{}).Where("id = ?", id).Updates(product)
 
 	if res.Error != nil {
-		return models.Product{}, &utils.AppError{
-			StatusCode: 500,
-			Message:    "Internal Server Error",
-		}
+		return models.Product{}, utils.InternalServerError()
 	}
 	if res.RowsAffected == 0 {
-		return models.Product{}, &utils.AppError{
-			StatusCode: 404,
-			Message:    "Product Not Found",
-		}
+		return models.Product{}, utils.ProductNotFound()
 	}
 	return newProduct, nil
+}
+
+func GetAllProductsPaginated(limit int, offset int) ([]models.Product,error){
+	var products = make([]models.Product,0,20)
+	result := config.DB.Order("id asc").Limit(limit).Offset(offset).Find(&products)
+	if result.Error != nil{
+		return []models.Product{},utils.InternalServerError()
+	}
+	return products, nil
 }

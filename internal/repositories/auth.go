@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"GoLang/config"
-	"GoLang/models"
+	"GoLang/internal/models"
 )
 
 func InsertUser(user models.User) (models.User, error) {

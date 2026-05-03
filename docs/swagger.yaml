@@ -1,0 +1,304 @@
+definitions:
+  dto.CreateProductRequest:
+    properties:
+      name:
+        type: string
+      price:
+        type: number
+    required:
+    - name
+    - price
+    type: object
+  dto.GetAllProductsResponse:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/dto.ProductResponse'
+        type: array
+    type: object
+  dto.PatchUpdateProductRequest:
+    properties:
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  dto.ProductResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  dto.UpdateProductRequest:
+    properties:
+      name:
+        type: string
+      price:
+        type: number
+    required:
+    - name
+    - price
+    type: object
+  dto.UserLoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dto.UserRegisterRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dto.UserResponse:
+    properties:
+      id:
+        type: integer
+      token:
+        type: string
+      username:
+        type: string
+    type: object
+  utils.AppError:
+    properties:
+      message:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login User
+      parameters:
+      - description: User Login Request Body
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.AppError'
+      summary: Login User
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      description: User Logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.AppError'
+      summary: Logout User
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register or Signup User
+      parameters:
+      - description: User Request Body
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.AppError'
+      summary: Register User
+      tags:
+      - Auth
+  /products:
+    get:
+      description: Get all the products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GetAllProductsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.AppError'
+      summary: Get All Products
+      tags:
+      - Products
+    post:
+      consumes:
+      - application/json
+      description: Create a new product
+      parameters:
+      - description: Product Data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.AppError'
+      summary: Create Product
+      tags:
+      - Products
+  /products/{id}:
+    delete:
+      description: Delete product by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.AppError'
+      summary: Delete Product
+      tags:
+      - Products
+    get:
+      description: Get a product with an id
+      parameters:
+      - description: Product Id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.AppError'
+      summary: Get Product
+      tags:
+      - Products
+    patch:
+      consumes:
+      - application/json
+      description: Update partial product using product id
+      parameters:
+      - description: Product Id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Product Update Request Body Patch
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PatchUpdateProductRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.AppError'
+      summary: Update Product Partial
+      tags:
+      - Products
+    put:
+      consumes:
+      - application/json
+      description: Update full product using product id
+      parameters:
+      - description: Product Id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Product Update Request Body Put
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.AppError'
+      summary: Update Product Full
+      tags:
+      - Products
+swagger: "2.0"
